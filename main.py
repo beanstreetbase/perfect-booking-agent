@@ -321,6 +321,121 @@ async def view_bookings():
         "bookings": formatted_bookings
     }
 
+@app.get("/clients")
+async def get_clients():
+    """Get aggregated client data with booking history"""
+    conn = sqlite3.connect('bookings.db')
+    cursor = conn.cursor()
+
+    cursor.execute('''
+        SELECT 
+            client_phone,
+            client_name,
+            COUNT(*) as total_bookings,
+            SUM(service_price) as total_spent,
+            SUM(total_booking_fee) as total_fees_paid,
+            MAX(created_at) as last_booking_date,
+            MIN(created_at) as first_booking_date
+        FROM bookings
+        GROUP BY client_phone, client_name
+        ORDER BY total_bookings DESC, last_booking_date DESC
+    ''')
+
+    clients_data = cursor.fetchall()
+    
+    clients = []
+    for client in clients_data:
+        # Get booking history for this client
+        cursor.execute('''
+            SELECT id, service_type, service_price, booking_date, booking_time, status, created_at
+            FROM bookings
+            WHERE client_phone = ?
+            ORDER BY created_at DESC
+        ''', (client[0],))
+        
+        bookings = cursor.fetchall()
+        booking_history = []
+        for booking in bookings:
+            booking_history.append({
+                "booking_id": booking[0],
+                "service_type": booking[1],
+                "service_price": booking[2],
+                "booking_date": booking[3],
+                "booking_time": booking[4],
+                "status": booking[5],
+                "created_at": booking[6]
+            })
+        
+        clients.append({
+            "client_phone": client[0],
+            "client_name": client[1],
+            "total_bookings": client[2],
+            "total_spent": f"${client[3]:.2f}" if client[3] else "$0.00",
+            "total_fees_paid": f"${client[4]:.2f}" if client[4] else "$0.00",
+            "last_booking": client[5],
+            "first_booking": client[6],
+            "booking_history": booking_history
+        })
+
+    conn.close()
+
+    return {
+        "total_clients": len(clients),
+        "clients": clients
+    }
+
+@app.get("/bookings/calendar")
+async def get_calendar_bookings():
+    """Get bookings formatted for calendar view"""
+    from datetime import datetime
+    
+    conn = sqlite3.connect('bookings.db')
+    cursor = conn.cursor()
+
+    cursor.execute('''
+        SELECT id, client_name, service_type, service_price, booking_date, 
+               booking_time, status, created_at
+        FROM bookings
+        ORDER BY booking_date DESC
+    ''')
+
+    bookings = cursor.fetchall()
+    conn.close()
+
+    def parse_time_for_sorting(time_str):
+        """Convert '2:00 PM' to sortable 24-hour format"""
+        try:
+            return datetime.strptime(time_str, '%I:%M %p').strftime('%H:%M')
+        except:
+            return '00:00'  # Default for invalid times
+
+    # Group bookings by date
+    calendar_data = {}
+    for booking in bookings:
+        date = booking[4]  # booking_date
+        if date not in calendar_data:
+            calendar_data[date] = []
+        
+        calendar_data[date].append({
+            "id": booking[0],
+            "client_name": booking[1],
+            "service_type": booking[2],
+            "service_price": booking[3],
+            "booking_time": booking[5],
+            "status": booking[6],
+            "created_at": booking[7]
+        })
+
+    # Sort bookings within each date by time
+    for date in calendar_data:
+        calendar_data[date].sort(key=lambda x: parse_time_for_sorting(x['booking_time']))
+
+    return {
+        "calendar_bookings": calendar_data,
+        "total_dates": len(calendar_data),
+        "total_bookings": len(bookings)
+    }
+
 @app.get("/business-dashboard")
 async def business_dashboard():
     """Complete business analytics dashboard"""

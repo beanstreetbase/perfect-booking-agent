@@ -712,22 +712,144 @@
 
             <!-- Clients Section -->
             <section id="clients-section" class="dashboard-section" style="display: none;">
-                <!-- Clients content will be loaded dynamically -->
+                <div class="section-header">
+                    <h2>Client Management</h2>
+                    <div class="table-controls">
+                        <input type="text" id="client-search" placeholder="Search clients..." />
+                        <select id="client-sort">
+                            <option value="bookings">Sort by Bookings</option>
+                            <option value="revenue">Sort by Revenue</option>
+                            <option value="recent">Sort by Recent</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="stats-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                        <div class="stat-mini">
+                            <h4>Total Clients</h4>
+                            <div id="clients-total" style="font-size: 2rem; font-weight: bold; color: var(--primary);">0</div>
+                        </div>
+                        <div class="stat-mini">
+                            <h4>Repeat Clients</h4>
+                            <div id="clients-repeat" style="font-size: 2rem; font-weight: bold; color: var(--success);">0</div>
+                        </div>
+                        <div class="stat-mini">
+                            <h4>Avg Bookings/Client</h4>
+                            <div id="clients-avg" style="font-size: 2rem; font-weight: bold; color: var(--warning);">0</div>
+                        </div>
+                    </div>
+                    
+                    <div id="clients-table-container">
+                        <!-- Client table will be loaded here -->
+                    </div>
+                </div>
             </section>
 
             <!-- Calendar Section -->
             <section id="calendar-section" class="dashboard-section" style="display: none;">
-                <!-- Calendar content will be loaded dynamically -->
+                <div class="section-header">
+                    <h2>📅 Booking Calendar</h2>
+                </div>
+                
+                <div class="card">
+                    <div class="stats-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                        <div class="stat-mini">
+                            <h4>Total Dates</h4>
+                            <div id="calendar-total-dates" style="font-size: 2rem; font-weight: bold; color: var(--primary);">0</div>
+                        </div>
+                        <div class="stat-mini">
+                            <h4>Upcoming Bookings</h4>
+                            <div id="calendar-upcoming" style="font-size: 2rem; font-weight: bold; color: var(--success);">0</div>
+                        </div>
+                    </div>
+                    
+                    <div id="calendar-container">
+                        <!-- Calendar will be loaded here -->
+                    </div>
+                </div>
             </section>
 
             <!-- Reports Section -->
             <section id="reports-section" class="dashboard-section" style="display: none;">
-                <!-- Reports content will be loaded dynamically -->
+                <div class="section-header">
+                    <h2>📊 Business Reports</h2>
+                </div>
+                
+                <div class="card">
+                    <h3 style="margin-bottom: 1.5rem;">Revenue & Performance Metrics</h3>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                        <div class="stat-card">
+                            <h4>Total Revenue</h4>
+                            <div id="report-total-revenue" class="value">$0.00</div>
+                            <div class="trend">From all bookings</div>
+                        </div>
+                        <div class="stat-card">
+                            <h4>Booking Fees Collected</h4>
+                            <div id="report-booking-fees" class="value">$0.00</div>
+                            <div class="trend">Platform fees</div>
+                        </div>
+                        <div class="stat-card">
+                            <h4>Avg Booking Value</h4>
+                            <div id="report-avg-value" class="value">$0.00</div>
+                            <div class="trend">Per booking</div>
+                        </div>
+                        <div class="stat-card">
+                            <h4>Client Retention</h4>
+                            <div id="report-retention" class="value">0%</div>
+                            <div class="trend">Repeat customers</div>
+                        </div>
+                    </div>
+                    
+                    <h3 style="margin: 2rem 0 1rem;">Service Performance</h3>
+                    <div id="service-performance-container">
+                        <!-- Service breakdown will be loaded here -->
+                    </div>
+                </div>
             </section>
 
             <!-- Settings Section -->
             <section id="settings-section" class="dashboard-section" style="display: none;">
-                <!-- Settings content will be loaded dynamically -->
+                <div class="section-header">
+                    <h2>⚙️ System Settings</h2>
+                </div>
+                
+                <div class="card">
+                    <h3 style="margin-bottom: 1.5rem;">Business Information</h3>
+                    <div class="form-group">
+                        <label>Salon Name</label>
+                        <input type="text" value="Glamour Braids Studio" class="form-control" disabled />
+                    </div>
+                    <div class="form-group">
+                        <label>Booking Fee Percentage</label>
+                        <input type="text" value="10%" class="form-control" disabled />
+                    </div>
+                    <div class="form-group">
+                        <label>Tax Rate</label>
+                        <input type="text" value="8%" class="form-control" disabled />
+                    </div>
+                </div>
+                
+                <div class="card" style="margin-top: 1.5rem;">
+                    <h3 style="margin-bottom: 1.5rem;">Auto-Refresh Settings</h3>
+                    <div class="form-group">
+                        <label>Dashboard Auto-Refresh</label>
+                        <p style="color: var(--success);">✓ Enabled (Every 30 seconds)</p>
+                    </div>
+                </div>
+                
+                <div class="card" style="margin-top: 1.5rem;">
+                    <h3 style="margin-bottom: 1.5rem;">Database Information</h3>
+                    <div class="form-group">
+                        <label>Database Type</label>
+                        <p>SQLite (bookings.db)</p>
+                    </div>
+                    <div class="form-group">
+                        <label>Total Records</label>
+                        <p id="settings-total-bookings">Loading...</p>
+                    </div>
+                </div>
             </section>
         </main>
     </div>
@@ -1124,25 +1246,19 @@
         // Clients Section
         async function loadClientsSection() {
             try {
-                const response = await fetch('/view-bookings');
+                const response = await fetch('/clients');
                 const data = await response.json();
 
-                const clients = {};
-                data.bookings.forEach(booking => {
-                    if (!clients[booking.client_phone]) {
-                        clients[booking.client_phone] = {
-                            phone: booking.client_phone,
-                            name: booking.client_name,
-                            bookings: [],
-                            total_spent: 0,
-                            first_booking: booking.created_at
-                        };
-                    }
-                    clients[booking.client_phone].bookings.push(booking);
-                    clients[booking.client_phone].total_spent += booking.service_price;
-                });
+                // Update stats
+                document.getElementById('clients-total').textContent = data.total_clients;
+                const repeatClients = data.clients.filter(c => c.total_bookings > 1).length;
+                document.getElementById('clients-repeat').textContent = repeatClients;
+                const avgBookings = data.total_clients > 0 
+                    ? (data.clients.reduce((sum, c) => sum + c.total_bookings, 0) / data.total_clients).toFixed(1)
+                    : 0;
+                document.getElementById('clients-avg').textContent = avgBookings;
 
-                displayClientsTable(Object.values(clients));
+                displayClientsTable(data.clients);
                 showToast('Clients loaded successfully!', 'success');
             } catch (error) {
                 console.error('Error loading clients:', error);
@@ -1151,24 +1267,266 @@
         }
 
         function displayClientsTable(clients) {
-            const clientsSection = document.getElementById('clients-section');
-            // Simple placeholder for clients table - can be expanded
-            showToast('Clients section loaded!', 'info');
+            const container = document.getElementById('clients-table-container');
+            
+            let tableHTML = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Client Name</th>
+                            <th>Phone</th>
+                            <th>Total Bookings</th>
+                            <th>Total Spent</th>
+                            <th>Last Booking</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            clients.forEach(client => {
+                const lastBooking = new Date(client.last_booking).toLocaleDateString();
+                tableHTML += `
+                    <tr>
+                        <td><strong>${client.client_name}</strong></td>
+                        <td>${client.client_phone}</td>
+                        <td><span class="badge">${client.total_bookings} booking${client.total_bookings > 1 ? 's' : ''}</span></td>
+                        <td><strong>${client.total_spent}</strong></td>
+                        <td>${lastBooking}</td>
+                        <td>
+                            <button class="btn-small btn-success" onclick="viewClientDetails('${client.client_phone}')">
+                                View Details
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+            
+            container.innerHTML = tableHTML;
+        }
+
+        async function viewClientDetails(clientPhone) {
+            try {
+                const response = await fetch('/clients');
+                const data = await response.json();
+                const client = data.clients.find(c => c.client_phone === clientPhone);
+                
+                if (!client) {
+                    showToast('Client not found', 'error');
+                    return;
+                }
+                
+                const modalContent = document.getElementById('modal-content');
+                let historyHTML = '';
+                
+                client.booking_history.forEach(booking => {
+                    historyHTML += `
+                        <div class="form-group" style="border-bottom: 1px solid #f1f3f4; padding-bottom: 1rem; margin-bottom: 1rem;">
+                            <strong>${booking.service_type}</strong><br>
+                            Date: ${booking.booking_date} at ${booking.booking_time}<br>
+                            Price: $${booking.service_price}<br>
+                            Status: <span class="status-badge status-${booking.status}">${booking.status}</span>
+                        </div>
+                    `;
+                });
+                
+                modalContent.innerHTML = `
+                    <div class="form-group">
+                        <label>Client Name:</label>
+                        <p><strong>${client.client_name}</strong></p>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone:</label>
+                        <p>${client.client_phone}</p>
+                    </div>
+                    <div class="form-group">
+                        <label>Total Bookings:</label>
+                        <p><strong>${client.total_bookings}</strong></p>
+                    </div>
+                    <div class="form-group">
+                        <label>Total Spent:</label>
+                        <p><strong>${client.total_spent}</strong></p>
+                    </div>
+                    <div class="form-group">
+                        <label>Member Since:</label>
+                        <p>${new Date(client.first_booking).toLocaleDateString()}</p>
+                    </div>
+                    <div class="form-group">
+                        <label>Booking History:</label>
+                        ${historyHTML || '<p>No booking history</p>'}
+                    </div>
+                `;
+                
+                document.querySelector('.modal-header h3').textContent = 'Client Details';
+                document.getElementById('booking-modal').style.display = 'flex';
+                
+            } catch (error) {
+                console.error('Error loading client details:', error);
+                showToast('Failed to load client details', 'error');
+            }
         }
 
         // Calendar Section
-        function loadCalendarSection() {
-            showToast('Calendar feature coming soon!', 'info');
+        async function loadCalendarSection() {
+            try {
+                const response = await fetch('/bookings/calendar');
+                const data = await response.json();
+
+                // Update stats
+                document.getElementById('calendar-total-dates').textContent = data.total_dates;
+                document.getElementById('calendar-upcoming').textContent = data.total_bookings;
+
+                displayCalendar(data.calendar_bookings);
+                showToast('Calendar loaded successfully!', 'success');
+            } catch (error) {
+                console.error('Error loading calendar:', error);
+                showToast('Failed to load calendar', 'error');
+            }
+        }
+
+        function displayCalendar(calendarBookings) {
+            const container = document.getElementById('calendar-container');
+            
+            let calendarHTML = '<div style="display: grid; gap: 1rem;">';
+            
+            // Sort dates
+            const sortedDates = Object.keys(calendarBookings).sort((a, b) => new Date(b) - new Date(a));
+            
+            sortedDates.forEach(date => {
+                const bookings = calendarBookings[date];
+                const dateObj = new Date(date);
+                const formattedDate = dateObj.toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+                
+                calendarHTML += `
+                    <div class="card" style="padding: 1.5rem; border-left: 4px solid var(--primary);">
+                        <h3 style="margin-bottom: 1rem; color: var(--primary);">
+                            ${formattedDate}
+                            <span style="font-size: 0.9rem; color: var(--gray); font-weight: normal;">
+                                (${bookings.length} booking${bookings.length > 1 ? 's' : ''})
+                            </span>
+                        </h3>
+                        <div style="display: grid; gap: 0.75rem;">
+                `;
+                
+                bookings.forEach(booking => {
+                    calendarHTML += `
+                        <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong style="color: var(--dark);">${booking.booking_time}</strong> - 
+                                <span>${booking.client_name}</span> - 
+                                <span style="color: var(--primary);">${booking.service_type}</span>
+                            </div>
+                            <div style="text-align: right;">
+                                <strong>$${booking.service_price}</strong><br>
+                                <span class="status-badge status-${booking.status}">${booking.status}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                calendarHTML += `
+                        </div>
+                    </div>
+                `;
+            });
+            
+            calendarHTML += '</div>';
+            
+            if (sortedDates.length === 0) {
+                calendarHTML = '<p style="text-align: center; padding: 3rem; color: var(--gray);">No bookings scheduled</p>';
+            }
+            
+            container.innerHTML = calendarHTML;
         }
 
         // Reports Section
-        function loadReportsSection() {
-            showToast('Reports feature coming soon!', 'info');
+        async function loadReportsSection() {
+            try {
+                const response = await fetch('/business-dashboard');
+                const data = await response.json();
+
+                // Update revenue metrics
+                document.getElementById('report-total-revenue').textContent = data.revenue_analytics.total_revenue;
+                document.getElementById('report-booking-fees').textContent = data.revenue_analytics.booking_fees;
+                document.getElementById('report-avg-value').textContent = data.revenue_analytics.average_booking_value;
+                document.getElementById('report-retention').textContent = data.business_overview.client_retention;
+
+                // Display service performance
+                displayServicePerformance(data.service_analytics);
+                
+                showToast('Reports loaded successfully!', 'success');
+            } catch (error) {
+                console.error('Error loading reports:', error);
+                showToast('Failed to load reports', 'error');
+            }
+        }
+
+        function displayServicePerformance(services) {
+            const container = document.getElementById('service-performance-container');
+            
+            let html = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Service</th>
+                            <th>Total Bookings</th>
+                            <th>Average Price</th>
+                            <th>Revenue Share</th>
+                            <th>Performance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            services.forEach(service => {
+                const sharePercent = parseFloat(service.revenue_share);
+                html += `
+                    <tr>
+                        <td><strong>${service.service}</strong></td>
+                        <td>${service.bookings}</td>
+                        <td>${service.average_price}</td>
+                        <td>${service.revenue_share}</td>
+                        <td>
+                            <div style="background: #e9ecef; border-radius: 4px; overflow: hidden;">
+                                <div style="background: var(--primary); height: 8px; width: ${sharePercent}%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                    </tbody>
+                </table>
+            `;
+            
+            container.innerHTML = html;
         }
 
         // Settings Section
-        function loadSettingsSection() {
-            showToast('Settings feature coming soon!', 'info');
+        async function loadSettingsSection() {
+            try {
+                const response = await fetch('/view-bookings');
+                const data = await response.json();
+                
+                document.getElementById('settings-total-bookings').textContent = 
+                    `${data.total_bookings} bookings`;
+                
+                showToast('Settings loaded successfully!', 'success');
+            } catch (error) {
+                console.error('Error loading settings:', error);
+                showToast('Failed to load settings', 'error');
+            }
         }
 
         // Initialize dashboard on page load
