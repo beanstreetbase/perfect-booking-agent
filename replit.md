@@ -12,6 +12,10 @@ AI-powered salon booking system with WhatsApp and SMS integration. Built with Fa
 - **Dashboard**: Full-featured admin dashboard with Clients, Calendar, Reports, and Settings
 
 ## Recent Changes
+- **2025-10-05**: Implemented global search functionality to filter bookings and clients in real-time
+- **2025-10-05**: Implemented notification panel showing recent booking activity with badge counter
+- **2025-10-05**: Implemented user dropdown menu with Profile, Settings, Help, and Logout options
+- **2025-10-05**: Enhanced backend to accept all booking form parameters (phone, date, time)
 - **2025-10-05**: Implemented complete Clients section with aggregated client data and booking history
 - **2025-10-05**: Implemented Calendar section with chronologically sorted booking display
 - **2025-10-05**: Enhanced Reports section with revenue analytics and service performance metrics
