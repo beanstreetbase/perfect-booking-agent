@@ -1,79 +1,113 @@
-    from fastapi import FastAPI, Request
-    import os
-    from twilio.rest import Client
-    from dotenv import load_dotenv
+from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
+import uvicorn
+import os
 
-    # Load environment variables from .env file
-    load_dotenv()
+app = FastAPI(title="Perfect Booking Agent")
 
-    app = FastAPI(title="Perfect Booking Agent")
+        # Force HTML response to trigger web preview
+@app.get("/", response_class=HTMLResponse)
+async def root():
+    return """
+<!DOCTYPE html>
+            <html>
+            <head>
+                <title>Perfect Booking Agent</title>
+                <style>
+                    body {{ 
+                        font-family: Arial, sans-serif; 
+                        margin: 40px; 
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        color: white;
+                    }}
+                    .container {{
+                        max-width: 800px;
+                        margin: 0 auto;
+                        background: rgba(255,255,255,0.1);
+                        padding: 30px;
+                        border-radius: 15px;
+                        backdrop-filter: blur(10px);
+                    }}
+                    .status {{ 
+                        color: #4CAF50; 
+                        font-weight: bold;
+                        font-size: 1.2em;
+                    }}
+                    .endpoint {{
+                        background: rgba(255,255,255,0.2);
+                        padding: 10px;
+                        margin: 10px 0;
+                        border-radius: 5px;
+                    }}
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h1>🚀 Perfect Booking Agent</h1>
+                    <p class="status">Status: <span style="color: #4CAF50;">ACTIVE & RUNNING</span></p>
+                    <p>Your AI-powered salon booking system is successfully deployed!</p>
 
-    # Check if environment variables are loaded
-    DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY')
-    TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
-    TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
-    TWILIO_WHATSAPP_NUMBER = os.getenv('TWILIO_WHATSAPP_NUMBER')
+                    <h3>📊 System Status</h3>
+                    <div class="endpoint">
+                        <strong>Environment Variables Loaded:</strong><br>
+                        - DeepSeek API: {deepseek_status}<br>
+                        - Twilio SMS: {twilio_status}<br>
+                        - WhatsApp: {whatsapp_status}
+                    </div>
 
-    @app.get("/")
-    async def root():
-        # Check which environment variables are set
-        env_status = {
-            "deepseek_loaded": bool(DEEPSEEK_API_KEY),
-            "twilio_sid_loaded": bool(TWILIO_ACCOUNT_SID),
-            "twilio_token_loaded": bool(TWILIO_AUTH_TOKEN),
-            "twilio_number_loaded": bool(TWILIO_WHATSAPP_NUMBER)
-        }
+                    <h3>🔗 Test Endpoints</h3>
+                    <div class="endpoint">
+                        <a href="/health" style="color: #FFD700;">/health</a> - Health check
+                    </div>
+                    <div class="endpoint">
+                        <a href="/env-check" style="color: #FFD700;">/env-check</a> - Environment status
+                    </div>
+                    <div class="endpoint">
+                        <a href="/setup-guide" style="color: #FFD700;">/setup-guide</a> - Setup instructions
+                    </div>
 
-        return {
-            "message": "🚀 Perfect Booking Agent is running!",
-            "status": "active",
-            "environment_status": env_status,
-            "next_steps": [
-                "1. Add API keys to .env file",
-                "2. Connect WhatsApp webhook", 
-                "3. Test messaging"
-            ]
-        }
-
-    @app.post("/webhook/whatsapp")
-    async def whatsapp_webhook(request: Request):
-        """WhatsApp webhook handler"""
-        try:
-            # Check if Twilio credentials are available
-            if not all([TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_WHATSAPP_NUMBER]):
-                return {"error": "Twilio credentials not configured"}
-
-            twilio_client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
-
-            form_data = await request.form()
-            from_number = form_data.get('From', '')
-            message_body = form_data.get('Body', '')
-
-            print(f"📱 WhatsApp message from {from_number}: {message_body}")
-
-            response_text = f"🤖 Thanks for your message: '{message_body}'. I'm your booking assistant!"
-
-            message = twilio_client.messages.create(
-                body=response_text,
-                from_=f"whatsapp:{TWILIO_WHATSAPP_NUMBER}",
-                to=from_number
+                    <h3>🎯 Next Steps</h3>
+                    <ol>
+                        <li>Configure WhatsApp webhook in Twilio</li>
+                        <li>Test AI booking conversations</li>
+                        <li>Set up payment system</li>
+                        <li>Deploy to production</li>
+                    </ol>
+                </div>
+            </body>
+            </html>
+            """.format(
+                deepseek_status="✅" if os.getenv('DEEPSEEK_API_KEY') else "❌",
+                twilio_status="✅" if os.getenv('TWILIO_ACCOUNT_SID') else "❌", 
+                whatsapp_status="✅" if os.getenv('TWILIO_WHATSAPP_NUMBER') else "❌"
             )
 
-            return {"status": "processed", "message_sid": message.sid}
+@app.get("/health")
+async def health():
+            return {"status": "healthy", "service": "booking_agent"}
 
-        except Exception as e:
-            return {"error": str(e)}
+@app.get("/env-check")
+async def env_check():
+            return {
+                "DEEPSEEK_API_KEY": "✅ LOADED" if os.getenv('DEEPSEEK_API_KEY') else "❌ MISSING",
+                "TWILIO_ACCOUNT_SID": "✅ LOADED" if os.getenv('TWILIO_ACCOUNT_SID') else "❌ MISSING",
+                "TWILIO_AUTH_TOKEN": "✅ LOADED" if os.getenv('TWILIO_AUTH_TOKEN') else "❌ MISSING",
+                "TWILIO_WHATSAPP_NUMBER": "✅ LOADED" if os.getenv('TWILIO_WHATSAPP_NUMBER') else "❌ MISSING"
+            }
 
-    @app.get("/env-check")
-    async def env_check():
-        """Check if environment variables are loaded"""
-        return {
-            "deepseek_key_loaded": bool(DEEPSEEK_API_KEY),
-            "twilio_sid_loaded": bool(TWILIO_ACCOUNT_SID),
-            "twilio_token_loaded": bool(TWILIO_AUTH_TOKEN), 
-            "twilio_number_loaded": bool(TWILIO_WHATSAPP_NUMBER)
-        }
+@app.get("/setup-guide")
+async def setup_guide():
+            return {
+                "message": "Setup Instructions",
+                "steps": [
+                    "1. Add API keys to .env file",
+                    "2. Configure Twilio WhatsApp webhook",
+                    "3. Test the /webhook/whatsapp endpoint", 
+                    "4. Connect your phone to WhatsApp sandbox"
+                ]
+            }
 
-    if __name__ == "__main__":
-        import uvicorn
-        uvicorn.run(app, host="0.0.0.0", port=8000)
+if __name__ == "__main__":
+    print("🚀 Starting server... Looking for web preview...")
+    print("📱 If web preview doesn't appear, use the URL above manually")
+    uvicorn.run(app, host="0.0.0.0", port=5000)

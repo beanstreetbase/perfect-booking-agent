@@ -39,6 +39,3 @@ logs/
 .idea/
 *.swp
 *.swo
-
-# Replit
-.replit
