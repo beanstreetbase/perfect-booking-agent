@@ -7,12 +7,16 @@ channel = "stable-25_05"
 packages = ["_4ti2"]
 
 [[ports]]
+localPort = 5000
+externalPort = 80
+
+[[ports]]
 localPort = 8000
 externalPort = 80
 
 [[ports]]
-localPort = 5000
-externalPort = 80
+localPort = 34239
+externalPort = 3000
 
 [agent]
 expertMode = true
