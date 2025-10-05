@@ -1039,6 +1039,102 @@
         </div>
     </div>
 
+    <!-- Profile Modal -->
+    <div id="profile-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>👤 Admin Profile</h3>
+                <button class="close-modal" onclick="closeProfileModal()">&times;</button>
+            </div>
+            <div style="padding: 2rem;">
+                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div class="user-avatar" style="width: 80px; height: 80px; font-size: 2rem;">AD</div>
+                        <div>
+                            <h2 style="margin: 0; color: var(--dark);">Admin User</h2>
+                            <p style="margin: 0.25rem 0 0 0; color: var(--gray);">System Administrator</p>
+                        </div>
+                    </div>
+                    <div style="border-top: 1px solid #e9ecef; padding-top: 1.5rem;">
+                        <div style="display: grid; gap: 1rem;">
+                            <div>
+                                <div style="font-weight: 600; color: var(--dark); margin-bottom: 0.25rem;">Email</div>
+                                <div style="color: var(--gray);">admin@glamourbraids.com</div>
+                            </div>
+                            <div>
+                                <div style="font-weight: 600; color: var(--dark); margin-bottom: 0.25rem;">Role</div>
+                                <div style="color: var(--gray);">Administrator</div>
+                            </div>
+                            <div>
+                                <div style="font-weight: 600; color: var(--dark); margin-bottom: 0.25rem;">Access Level</div>
+                                <div style="color: var(--gray);">Full Access</div>
+                            </div>
+                            <div>
+                                <div style="font-weight: 600; color: var(--dark); margin-bottom: 0.25rem;">Last Login</div>
+                                <div style="color: var(--gray);" id="last-login-time">Just now</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="border-top: 1px solid #e9ecef; padding-top: 1.5rem;">
+                        <button class="action-btn" onclick="closeProfileModal()" style="width: 100%;">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Center Modal -->
+    <div id="help-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>❓ Help Center</h3>
+                <button class="close-modal" onclick="closeHelpModal()">&times;</button>
+            </div>
+            <div style="padding: 2rem;">
+                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    <div>
+                        <h4 style="color: var(--primary); margin-bottom: 0.5rem;">📚 Getting Started</h4>
+                        <p style="color: var(--gray); line-height: 1.6;">
+                            Welcome to the Booking Dashboard! Use the navigation menu to access different sections:
+                            Dashboard, Clients, Calendar, Reports, and Settings.
+                        </p>
+                    </div>
+                    <div>
+                        <h4 style="color: var(--primary); margin-bottom: 0.5rem;">🔍 Search Functionality</h4>
+                        <p style="color: var(--gray); line-height: 1.6;">
+                            Use the search bar at the top to quickly find bookings by client name, service type, 
+                            phone number, or booking date. Results appear instantly in the Recent Activity section.
+                        </p>
+                    </div>
+                    <div>
+                        <h4 style="color: var(--primary); margin-bottom: 0.5rem;">➕ Creating Bookings</h4>
+                        <p style="color: var(--gray); line-height: 1.6;">
+                            Click the "New Booking" button on the Dashboard to create a new booking. Fill in all 
+                            required fields including client name, service type, price, date, and time.
+                        </p>
+                    </div>
+                    <div>
+                        <h4 style="color: var(--primary); margin-bottom: 0.5rem;">📊 Reports & Analytics</h4>
+                        <p style="color: var(--gray); line-height: 1.6;">
+                            View detailed analytics in the Reports section including revenue metrics, service 
+                            performance, and client retention rates. Data updates every 30 seconds automatically.
+                        </p>
+                    </div>
+                    <div>
+                        <h4 style="color: var(--primary); margin-bottom: 0.5rem;">🔔 Notifications</h4>
+                        <p style="color: var(--gray); line-height: 1.6;">
+                            Click the notification bell to see recent booking activity. The badge shows the number 
+                            of recent bookings requiring your attention.
+                        </p>
+                    </div>
+                    <div style="border-top: 1px solid #e9ecef; padding-top: 1.5rem;">
+                        <button class="action-btn" onclick="closeHelpModal()" style="width: 100%;">Got it!</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Global variables
         let charts = {};
@@ -1161,32 +1257,55 @@
 
         // Profile menu handler
         function handleProfileClick() {
-            toggleUserMenu(); // Close dropdown
-            showToast('Profile settings coming soon!', 'info');
+            toggleUserMenu();
+            showProfileModal();
         }
 
         // Settings menu handler
         function handleSettingsClick() {
-            toggleUserMenu(); // Close dropdown
+            toggleUserMenu();
             showSection('settings');
-            showToast('Navigated to Settings', 'success');
         }
 
         // Help center handler
         function handleHelpClick() {
-            toggleUserMenu(); // Close dropdown
-            showToast('Help center coming soon!', 'info');
+            toggleUserMenu();
+            showHelpModal();
         }
 
         // Logout handler
         function handleLogout() {
-            toggleUserMenu(); // Close dropdown
+            toggleUserMenu();
             if (confirm('Are you sure you want to logout?')) {
                 showToast('Logging out...', 'info');
                 setTimeout(() => {
-                    showToast('Logged out successfully! Redirecting to login...', 'success');
-                }, 1000);
+                    window.location.reload();
+                }, 1500);
             }
+        }
+
+        // Show profile modal
+        function showProfileModal() {
+            const modal = document.getElementById('profile-modal');
+            modal.style.display = 'flex';
+        }
+
+        // Show help modal
+        function showHelpModal() {
+            const modal = document.getElementById('help-modal');
+            modal.style.display = 'flex';
+        }
+
+        // Close profile modal
+        function closeProfileModal() {
+            const modal = document.getElementById('profile-modal');
+            modal.style.display = 'none';
+        }
+
+        // Close help modal
+        function closeHelpModal() {
+            const modal = document.getElementById('help-modal');
+            modal.style.display = 'none';
         }
 
         // Close dropdowns when clicking outside
