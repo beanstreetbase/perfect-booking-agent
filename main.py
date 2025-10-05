@@ -99,10 +99,6 @@ def init_db():
 
 init_db()
 
-@app.get("/test")
-async def test():
-    return {"status": "working", "message": "Server is running correctly"}
-
 @app.get("/")
 @app.head("/")
 async def root():

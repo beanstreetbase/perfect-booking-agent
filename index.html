@@ -296,24 +296,24 @@
             <!-- Stats Grid -->
             <section class="stats-grid">
                 <div class="stat-card">
-                    <h3>Total Users</h3>
-                    <div class="value">12,458</div>
-                    <div class="trend">↑ 12% from last month</div>
+                    <h3>Total Bookings</h3>
+                    <div class="value">0</div>
+                    <div class="trend">Loading...</div>
                 </div>
                 <div class="stat-card warning">
-                    <h3>Revenue</h3>
-                    <div class="value">$48,256</div>
-                    <div class="trend">↑ 8% from last month</div>
+                    <h3>Total Revenue</h3>
+                    <div class="value">$0.00</div>
+                    <div class="trend">Loading...</div>
                 </div>
                 <div class="stat-card success">
-                    <h3>Conversion Rate</h3>
-                    <div class="value">24.8%</div>
-                    <div class="trend down">↓ 2% from last month</div>
+                    <h3>Cancellation Rate</h3>
+                    <div class="value">0%</div>
+                    <div class="trend">Loading...</div>
                 </div>
                 <div class="stat-card">
-                    <h3>Active Sessions</h3>
-                    <div class="value">1,248</div>
-                    <div class="trend">↑ 15% from last month</div>
+                    <h3>Unique Clients</h3>
+                    <div class="value">0</div>
+                    <div class="trend">Loading...</div>
                 </div>
             </section>
 
@@ -381,14 +381,19 @@
                     const data = await response.json();
 
                     // Update stats cards
-                    document.querySelector('.stat-card .value').textContent = 
+                    const statCards = document.querySelectorAll('.stat-card');
+                    
+                    statCards[0].querySelector('.value').textContent = 
                         data.business_overview.total_bookings.toLocaleString();
-
-                    document.querySelector('.stat-card.warning .value').textContent = 
+                    
+                    statCards[1].querySelector('.value').textContent = 
                         data.revenue_analytics.total_revenue;
-
-                    document.querySelector('.stat-card.success .value').textContent = 
+                    
+                    statCards[2].querySelector('.value').textContent = 
                         data.business_overview.cancellation_rate;
+                    
+                    statCards[3].querySelector('.value').textContent = 
+                        data.business_overview.unique_clients.toLocaleString();
 
                     // Update recent activity with real bookings
                     const bookingsResponse = await fetch('/view-bookings');
