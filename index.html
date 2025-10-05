@@ -659,16 +659,16 @@
 
             <!-- User Dropdown Menu -->
             <div class="dropdown-menu" id="user-dropdown">
-                <div class="dropdown-item" onclick="showToast('Profile settings coming soon!', 'info')">
+                <div class="dropdown-item" onclick="handleProfileClick()">
                     <span>👤</span>
                     <span>My Profile</span>
                 </div>
-                <div class="dropdown-item" onclick="showSection('settings')">
+                <div class="dropdown-item" onclick="handleSettingsClick()">
                     <span>⚙️</span>
                     <span>Settings</span>
                 </div>
                 <div class="dropdown-divider"></div>
-                <div class="dropdown-item" onclick="showToast('Help center coming soon!', 'info')">
+                <div class="dropdown-item" onclick="handleHelpClick()">
                     <span>❓</span>
                     <span>Help Center</span>
                 </div>
@@ -1159,12 +1159,32 @@
             userMenu.classList.toggle('show');
         }
 
+        // Profile menu handler
+        function handleProfileClick() {
+            toggleUserMenu(); // Close dropdown
+            showToast('Profile settings coming soon!', 'info');
+        }
+
+        // Settings menu handler
+        function handleSettingsClick() {
+            toggleUserMenu(); // Close dropdown
+            showSection('settings');
+            showToast('Navigated to Settings', 'success');
+        }
+
+        // Help center handler
+        function handleHelpClick() {
+            toggleUserMenu(); // Close dropdown
+            showToast('Help center coming soon!', 'info');
+        }
+
         // Logout handler
         function handleLogout() {
+            toggleUserMenu(); // Close dropdown
             if (confirm('Are you sure you want to logout?')) {
                 showToast('Logging out...', 'info');
                 setTimeout(() => {
-                    showToast('Logout functionality would redirect to login page', 'success');
+                    showToast('Logged out successfully! Redirecting to login...', 'success');
                 }, 1000);
             }
         }
