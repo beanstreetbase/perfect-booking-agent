@@ -371,38 +371,111 @@
             </section>
         </main>
     </div>
-
     <script>
-        // Simple interactive features
+        // Enhanced dashboard with FastAPI integration
         document.addEventListener('DOMContentLoaded', function() {
-            // Update current time
-            function updateTime() {
-                const now = new Date();
-                document.querySelector('.header h1').textContent = 
-                    `Dashboard - ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+            // Update stats with real data from your API
+            async function updateDashboardStats() {
+                try {
+                    const response = await fetch('/business-dashboard');
+                    const data = await response.json();
+
+                    // Update stats cards
+                    document.querySelector('.stat-card .value').textContent = 
+                        data.business_overview.total_bookings.toLocaleString();
+
+                    document.querySelector('.stat-card.warning .value').textContent = 
+                        data.revenue_analytics.total_revenue;
+
+                    document.querySelector('.stat-card.success .value').textContent = 
+                        data.business_overview.cancellation_rate;
+
+                    // Update recent activity with real bookings
+                    const bookingsResponse = await fetch('/view-bookings');
+                    const bookingsData = await bookingsResponse.json();
+
+                    updateRecentActivity(bookingsData.bookings);
+
+                } catch (error) {
+                    console.error('Error fetching dashboard data:', error);
+                }
             }
 
-            // Update time every second
-            setInterval(updateTime, 1000);
-            updateTime();
+            function updateRecentActivity(bookings) {
+                const activityList = document.querySelector('.activity-list');
+                activityList.innerHTML = '';
 
-            // Add click handlers to navigation
+                // Show latest 4 bookings
+                const recentBookings = bookings.slice(0, 4);
+
+                recentBookings.forEach(booking => {
+                    const activityItem = document.createElement('li');
+                    activityItem.className = 'activity-item';
+                    activityItem.innerHTML = `
+                        <div class="activity-icon">📅</div>
+                        <div class="activity-content">
+                            <h4>New booking: ${booking.service_type}</h4>
+                            <p>${booking.client_name} - ${booking.booking_date}</p>
+                        </div>
+                    `;
+                    activityList.appendChild(activityItem);
+                });
+            }
+
+            // Navigation handlers
             document.querySelectorAll('.nav-links a').forEach(link => {
                 link.addEventListener('click', function(e) {
                     e.preventDefault();
                     document.querySelectorAll('.nav-links a').forEach(l => l.classList.remove('active'));
                     this.classList.add('active');
+
+                    // Handle different dashboard sections
+                    const section = this.textContent.trim();
+                    handleNavigation(section);
                 });
             });
 
-            // Simulate real-time updates
-            setInterval(() => {
-                const usersElement = document.querySelector('.stat-card .value');
-                const currentUsers = parseInt(usersElement.textContent.replace(',', ''));
-                const randomChange = Math.floor(Math.random() * 10) - 2; // -2 to +7
-                const newUsers = Math.max(0, currentUsers + randomChange);
-                usersElement.textContent = newUsers.toLocaleString();
-            }, 5000);
+            function handleNavigation(section) {
+                // You can expand this to load different dashboard views
+                console.log('Navigating to:', section);
+
+                if (section === '📊 Dashboard') {
+                    updateDashboardStats();
+                } else if (section === '📈 Analytics') {
+                    // Load analytics view
+                    window.location.href = '/business-dashboard';
+                }
+            }
+
+            // Test booking functionality
+            document.querySelector('.test-booking-btn')?.addEventListener('click', async function() {
+                try {
+                    const response = await fetch('/simulate-booking', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            client_name: 'Dashboard Test User',
+                            service_type: 'Goddess Braids',
+                            service_price: 120
+                        })
+                    });
+
+                    const result = await response.json();
+                    alert('Test booking created! ID: ' + result.booking_id);
+                    updateDashboardStats(); // Refresh stats
+
+                } catch (error) {
+                    console.error('Error creating test booking:', error);
+                }
+            });
+
+            // Initialize dashboard
+            updateDashboardStats();
+
+            // Auto-refresh every 30 seconds
+            setInterval(updateDashboardStats, 30000);
         });
     </script>
 </body>

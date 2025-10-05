@@ -100,6 +100,7 @@ def init_db():
 init_db()
 
 @app.get("/")
+@app.head("/")
 async def root():
     return FileResponse(
         "index.html",
