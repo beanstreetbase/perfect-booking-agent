@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --success: #4cc9f0;
+            --warning: #f72585;
+            --dark: #2b2d42;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+        }
+
+        body {
+            background-color: #f5f7fb;
+            color: var(--dark);
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 2rem 1rem;
+            position: fixed;
+            height: 100vh;
+            width: 250px;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .nav-links {
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-links i {
+            margin-right: 0.75rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            grid-column: 2;
+            padding: 2rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-bar input {
+            border: none;
+            outline: none;
+            padding: 0.5rem;
+            width: 300px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid var(--primary);
+        }
+
+        .stat-card.warning {
+            border-left-color: var(--warning);
+        }
+
+        .stat-card.success {
+            border-left-color: var(--success);
+        }
+
+        .stat-card h3 {
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .trend {
+            font-size: 0.8rem;
+            color: var(--success);
+        }
+
+        .trend.down {
+            color: var(--warning);
+        }
+
+        /* Charts and Tables */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .chart-container, .recent-activity {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-header, .activity-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .chart-placeholder {
+            background: #f8f9fa;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            color: var(--gray);
+        }
+
+        .activity-list {
+            list-style: none;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            color: var(--primary);
+        }
+
+        .activity-content h4 {
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-content p {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .main-content {
+                grid-column: 1;
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .search-bar input {
+                width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">Dashboard</div>
+            <ul class="nav-links">
+                <li><a href="#" class="active">📊 Dashboard</a></li>
+                <li><a href="#">👥 Users</a></li>
+                <li><a href="#">📈 Analytics</a></li>
+                <li><a href="#">⚙️ Settings</a></li>
+                <li><a href="#">🔒 Security</a></li>
+                <li><a href="#">📋 Reports</a></li>
+                <li><a href="#">🛠️ Tools</a></li>
+                <li><a href="#">❓ Help</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="search-bar">
+                    <input type="text" placeholder="Search...">
+                    <span>🔍</span>
+                </div>
+                <div class="user-info">
+                    <div class="notifications">🔔</div>
+                    <div class="user-avatar">JD</div>
+                    <span>John Doe</span>
+                </div>
+            </header>
+
+            <!-- Stats Grid -->
+            <section class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Users</h3>
+                    <div class="value">12,458</div>
+                    <div class="trend">↑ 12% from last month</div>
+                </div>
+                <div class="stat-card warning">
+                    <h3>Revenue</h3>
+                    <div class="value">$48,256</div>
+                    <div class="trend">↑ 8% from last month</div>
+                </div>
+                <div class="stat-card success">
+                    <h3>Conversion Rate</h3>
+                    <div class="value">24.8%</div>
+                    <div class="trend down">↓ 2% from last month</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Active Sessions</h3>
+                    <div class="value">1,248</div>
+                    <div class="trend">↑ 15% from last month</div>
+                </div>
+            </section>
+
+            <!-- Charts and Activity -->
+            <section class="content-grid">
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h2>Performance Overview</h2>
+                        <select>
+                            <option>Last 7 days</option>
+                            <option>Last 30 days</option>
+                            <option>Last 90 days</option>
+                        </select>
+                    </div>
+                    <div class="chart-placeholder">
+                        Chart Area - Integrate with Chart.js or similar
+                    </div>
+                </div>
+
+                <div class="recent-activity">
+                    <div class="activity-header">
+                        <h2>Recent Activity</h2>
+                    </div>
+                    <ul class="activity-list">
+                        <li class="activity-item">
+                            <div class="activity-icon">👤</div>
+                            <div class="activity-content">
+                                <h4>New user registered</h4>
+                                <p>2 minutes ago</p>
+                            </div>
+                        </li>
+                        <li class="activity-item">
+                            <div class="activity-icon">💰</div>
+                            <div class="activity-content">
+                                <h4>Payment received</h4>
+                                <p>1 hour ago</p>
+                            </div>
+                        </li>
+                        <li class="activity-item">
+                            <div class="activity-icon">📊</div>
+                            <div class="activity-content">
+                                <h4>Report generated</h4>
+                                <p>3 hours ago</p>
+                            </div>
+                        </li>
+                        <li class="activity-item">
+                            <div class="activity-icon">🛠️</div>
+                            <div class="activity-content">
+                                <h4>System updated</h4>
+                                <p>5 hours ago</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Simple interactive features
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update current time
+            function updateTime() {
+                const now = new Date();
+                document.querySelector('.header h1').textContent = 
+                    `Dashboard - ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+            }
+
+            // Update time every second
+            setInterval(updateTime, 1000);
+            updateTime();
+
+            // Add click handlers to navigation
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.querySelectorAll('.nav-links a').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+
+            // Simulate real-time updates
+            setInterval(() => {
+                const usersElement = document.querySelector('.stat-card .value');
+                const currentUsers = parseInt(usersElement.textContent.replace(',', ''));
+                const randomChange = Math.floor(Math.random() * 10) - 2; // -2 to +7
+                const newUsers = Math.max(0, currentUsers + randomChange);
+                usersElement.textContent = newUsers.toLocaleString();
+            }, 5000);
+        });
+    </script>
+</body>
+</html>
