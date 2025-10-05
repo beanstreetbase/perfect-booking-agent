@@ -447,6 +447,22 @@
             font-size: 0.9rem;
         }
 
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            background: white;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+
         /* Responsive */
         @media (max-width: 1200px) {
             .content-grid {
@@ -558,17 +574,17 @@
             <section id="dashboard-section" class="dashboard-section">
                 <!-- Quick Actions -->
                 <div class="quick-actions">
-                    <button class="action-btn" onclick="createTestBooking()">
-                        ➕ Create Test Booking
+                    <button class="action-btn" onclick="openNewBookingModal()">
+                        ➕ New Booking
+                    </button>
+                    <button class="action-btn" onclick="refreshDashboard()">
+                        🔄 Refresh Data
                     </button>
                     <button class="action-btn" onclick="showSection('bookings')">
                         📋 View All Bookings
                     </button>
-                    <button class="action-btn success" onclick="generateSampleData()">
-                        🎯 Generate Sample Data
-                    </button>
-                    <button class="action-btn" onclick="refreshDashboard()">
-                        🔄 Refresh Data
+                    <button class="action-btn" onclick="showSection('clients')">
+                        👥 View Clients
                     </button>
                 </div>
 
@@ -867,6 +883,53 @@
         </div>
     </div>
 
+    <!-- New Booking Form Modal -->
+    <div id="new-booking-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Create New Booking</h3>
+                <button class="close-modal" onclick="closeNewBookingModal()">&times;</button>
+            </div>
+            <form id="new-booking-form" onsubmit="submitNewBooking(event)">
+                <div class="form-group">
+                    <label>Client Name *</label>
+                    <input type="text" id="booking-client-name" class="form-control" required placeholder="Enter client name" />
+                </div>
+                <div class="form-group">
+                    <label>Client Phone</label>
+                    <input type="tel" id="booking-client-phone" class="form-control" placeholder="+1234567890" />
+                </div>
+                <div class="form-group">
+                    <label>Service Type *</label>
+                    <select id="booking-service-type" class="form-control" required>
+                        <option value="">Select a service</option>
+                        <option value="Goddess Braids">Goddess Braids</option>
+                        <option value="Knotless Box Braids">Knotless Box Braids</option>
+                        <option value="Cornrows">Cornrows</option>
+                        <option value="Faux Locs">Faux Locs</option>
+                        <option value="Senegalese Twists">Senegalese Twists</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Service Price ($) *</label>
+                    <input type="number" id="booking-price" class="form-control" required min="0" step="0.01" placeholder="120.00" />
+                </div>
+                <div class="form-group">
+                    <label>Booking Date *</label>
+                    <input type="date" id="booking-date" class="form-control" required />
+                </div>
+                <div class="form-group">
+                    <label>Booking Time *</label>
+                    <input type="time" id="booking-time" class="form-control" required />
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button type="submit" class="action-btn" style="flex: 1;">Create Booking</button>
+                    <button type="button" class="action-btn" onclick="closeNewBookingModal()" style="flex: 1; background: var(--gray);">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         // Global variables
         let charts = {};
@@ -1145,6 +1208,74 @@
 
         function closeModal() {
             document.getElementById('booking-modal').style.display = 'none';
+        }
+
+        function openNewBookingModal() {
+            // Set default date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('booking-date').value = today;
+            
+            // Clear form
+            document.getElementById('new-booking-form').reset();
+            
+            // Show modal
+            document.getElementById('new-booking-modal').style.display = 'flex';
+        }
+
+        function closeNewBookingModal() {
+            document.getElementById('new-booking-modal').style.display = 'none';
+        }
+
+        async function submitNewBooking(event) {
+            event.preventDefault();
+            
+            try {
+                // Get form values
+                const clientName = document.getElementById('booking-client-name').value;
+                const clientPhone = document.getElementById('booking-client-phone').value || '+1000000000';
+                const serviceType = document.getElementById('booking-service-type').value;
+                const servicePrice = parseFloat(document.getElementById('booking-price').value);
+                const bookingDate = document.getElementById('booking-date').value;
+                const bookingTimeInput = document.getElementById('booking-time').value; // 24-hour format
+                
+                // Convert 24-hour time to 12-hour format with AM/PM
+                const [hours, minutes] = bookingTimeInput.split(':');
+                const hour = parseInt(hours);
+                const period = hour >= 12 ? 'PM' : 'AM';
+                const displayHour = hour % 12 || 12;
+                const bookingTime = `${displayHour}:${minutes} ${period}`;
+                
+                showToast('Creating booking...', 'info');
+                
+                const response = await fetch('/simulate-booking', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        client_name: clientName,
+                        client_phone: clientPhone,
+                        service_type: serviceType,
+                        service_price: servicePrice,
+                        booking_date: bookingDate,
+                        booking_time: bookingTime
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showToast(`Booking created successfully! ID: ${result.booking_id}`, 'success');
+                    closeNewBookingModal();
+                    loadDashboardData();
+                } else {
+                    showToast('Failed to create booking: ' + (result.detail || 'Unknown error'), 'error');
+                }
+
+            } catch (error) {
+                console.error('Error creating booking:', error);
+                showToast('Failed to create booking', 'error');
+            }
         }
 
         // API interactions

@@ -230,12 +230,15 @@ async def simulate_conversation():
 
 @app.post("/simulate-booking")
 async def simulate_booking(request: Request):
-    """Simulate booking creation (for testing)"""
+    """Create a new booking"""
     try:
         data = await request.json()
         client_name = data.get('client_name', 'Test Client')
+        client_phone = data.get('client_phone', '+1000000000')
         service_type = data.get('service_type', 'Goddess Braids')
         service_price = data.get('service_price', 120)
+        booking_date = data.get('booking_date', '2024-03-25')
+        booking_time = data.get('booking_time', '2:00 PM')
 
         # Calculate fees
         fee_calculation = calculate_booking_fee(service_price)
@@ -251,8 +254,8 @@ async def simulate_booking(request: Request):
              booking_fee_amount, tax_amount, total_booking_fee, booking_fee_paid)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
-            '+1000000000', client_name, "Glamour Braids Studio", 
-            service_type, service_price, '2024-03-25', '2:00 PM', '2-3 hours',
+            client_phone, client_name, "Glamour Braids Studio", 
+            service_type, service_price, booking_date, booking_time, '2-3 hours',
             fee_calculation['booking_fee_amount'], fee_calculation['tax_amount'],
             fee_calculation['total_booking_fee'], True
         ))
@@ -268,8 +271,8 @@ async def simulate_booking(request: Request):
             'service_type': service_type,
             'salon_name': "Glamour Braids Studio",
             'service_price': service_price,
-            'booking_date': '2024-03-25',
-            'booking_time': '2:00 PM',
+            'booking_date': booking_date,
+            'booking_time': booking_time,
             'duration': '2-3 hours',
             'fee_breakdown': fee_calculation
         }
