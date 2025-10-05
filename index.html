@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
+    <title>Booking Analytics Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {
             margin: 0;
@@ -25,6 +26,7 @@
         body {
             background-color: #f5f7fb;
             color: var(--dark);
+            line-height: 1.6;
         }
 
         .dashboard {
@@ -41,6 +43,7 @@
             position: fixed;
             height: 100vh;
             width: 250px;
+            overflow-y: auto;
         }
 
         .logo {
@@ -48,6 +51,7 @@
             margin-bottom: 2rem;
             font-size: 1.5rem;
             font-weight: bold;
+            color: white;
         }
 
         .nav-links {
@@ -65,23 +69,20 @@
             display: flex;
             align-items: center;
             border-radius: 8px;
-            transition: background 0.3s;
+            transition: all 0.3s ease;
+            cursor: pointer;
         }
 
         .nav-links a:hover, .nav-links a.active {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .nav-links i {
-            margin-right: 0.75rem;
-            width: 20px;
-            text-align: center;
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(5px);
         }
 
         /* Main Content */
         .main-content {
             grid-column: 2;
             padding: 2rem;
+            margin-left: 250px;
         }
 
         .header {
@@ -89,15 +90,19 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 2rem;
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
         }
 
         .search-bar {
             display: flex;
             align-items: center;
-            background: white;
+            background: #f8f9fa;
             padding: 0.5rem 1rem;
             border-radius: 25px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e9ecef;
         }
 
         .search-bar input {
@@ -105,6 +110,8 @@
             outline: none;
             padding: 0.5rem;
             width: 300px;
+            background: transparent;
+            font-size: 0.9rem;
         }
 
         .user-info {
@@ -114,21 +121,22 @@
         }
 
         .user-avatar {
-            width: 40px;
-            height: 40px;
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
-            background: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-weight: bold;
+            font-size: 1rem;
         }
 
         /* Stats Grid */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
@@ -136,9 +144,15 @@
         .stat-card {
             background: white;
             padding: 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border-left: 4px solid var(--primary);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border-left: 5px solid var(--primary);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
         }
 
         .stat-card.warning {
@@ -150,24 +164,64 @@
         }
 
         .stat-card h3 {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: var(--gray);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
         }
 
         .stat-card .value {
-            font-size: 2rem;
-            font-weight: bold;
+            font-size: 2.5rem;
+            font-weight: 700;
             margin-bottom: 0.5rem;
+            color: var(--dark);
         }
 
         .stat-card .trend {
             font-size: 0.8rem;
             color: var(--success);
+            font-weight: 500;
         }
 
-        .trend.down {
-            color: var(--warning);
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .action-btn {
+            background: white;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .action-btn:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(67, 97, 238, 0.3);
+        }
+
+        .action-btn.success {
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .action-btn.success:hover {
+            background: var(--success);
+            color: white;
+            box-shadow: 0 6px 20px rgba(76, 201, 240, 0.3);
         }
 
         /* Charts and Tables */
@@ -175,30 +229,30 @@
             display: grid;
             grid-template-columns: 2fr 1fr;
             gap: 1.5rem;
+            margin-bottom: 2rem;
         }
 
-        .chart-container, .recent-activity {
+        .chart-container, .recent-activity, .bookings-table-container {
             background: white;
             padding: 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         }
 
-        .chart-header, .activity-header {
+        .chart-header, .activity-header, .table-header {
             display: flex;
-            justify-content: between;
+            justify-content: space-between;
             align-items: center;
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #f1f3f4;
         }
 
-        .chart-placeholder {
-            background: #f8f9fa;
-            height: 300px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-            color: var(--gray);
+        .chart-header h2, .activity-header h2, .table-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin: 0;
         }
 
         .activity-list {
@@ -209,7 +263,14 @@
             display: flex;
             align-items: center;
             padding: 1rem 0;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid #f8f9fa;
+            transition: background 0.3s;
+        }
+
+        .activity-item:hover {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
         }
 
         .activity-item:last-child {
@@ -217,27 +278,182 @@
         }
 
         .activity-icon {
-            width: 40px;
-            height: 40px;
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
-            background: var(--light);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             display: flex;
             align-items: center;
             justify-content: center;
             margin-right: 1rem;
-            color: var(--primary);
+            color: white;
+            font-size: 1.1rem;
         }
 
         .activity-content h4 {
             margin-bottom: 0.25rem;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 0.95rem;
         }
 
         .activity-content p {
             color: var(--gray);
+            font-size: 0.85rem;
+            margin: 0;
+        }
+
+        /* Bookings Table */
+        .bookings-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .bookings-table th,
+        .bookings-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #f1f3f4;
+        }
+
+        .bookings-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .bookings-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-confirmed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-cancelled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Table Controls */
+        .table-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            align-items: center;
+        }
+
+        .table-controls input,
+        .table-controls select {
+            padding: 0.75rem;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            background: white;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #f1f3f4;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray);
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: background 0.3s;
+        }
+
+        /* Button Styles */
+        .btn-small {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin: 0 2px;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--dark);
             font-size: 0.9rem;
         }
 
         /* Responsive */
+        @media (max-width: 1200px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
         @media (max-width: 768px) {
             .dashboard {
                 grid-template-columns: 1fr;
@@ -249,15 +465,61 @@
 
             .main-content {
                 grid-column: 1;
+                padding: 1rem;
+                margin-left: 0;
             }
 
-            .content-grid {
-                grid-template-columns: 1fr;
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+
+            .search-bar {
+                width: 100%;
             }
 
             .search-bar input {
-                width: 200px;
+                width: 100%;
             }
+
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 1001;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            background: var(--success);
+        }
+
+        .toast.error {
+            background: var(--warning);
+        }
+
+        .toast.info {
+            background: var(--primary);
         }
     </style>
 </head>
@@ -265,16 +527,15 @@
     <div class="dashboard">
         <!-- Sidebar -->
         <aside class="sidebar">
-            <div class="logo">Dashboard</div>
+            <div class="logo">Booking Dashboard</div>
             <ul class="nav-links">
-                <li><a href="#" class="active">📊 Dashboard</a></li>
-                <li><a href="#">👥 Users</a></li>
-                <li><a href="#">📈 Analytics</a></li>
-                <li><a href="#">⚙️ Settings</a></li>
-                <li><a href="#">🔒 Security</a></li>
-                <li><a href="#">📋 Reports</a></li>
-                <li><a href="#">🛠️ Tools</a></li>
-                <li><a href="#">❓ Help</a></li>
+                <li><a href="#" class="active" onclick="showSection('dashboard')">📊 Dashboard</a></li>
+                <li><a href="#" onclick="showSection('bookings')">📋 Bookings</a></li>
+                <li><a href="#" onclick="showSection('analytics')">📈 Analytics</a></li>
+                <li><a href="#" onclick="showSection('clients')">👥 Clients</a></li>
+                <li><a href="#" onclick="showSection('calendar')">📅 Calendar</a></li>
+                <li><a href="#" onclick="showSection('reports')">📊 Reports</a></li>
+                <li><a href="#" onclick="showSection('settings')">⚙️ Settings</a></li>
             </ul>
         </aside>
 
@@ -283,204 +544,643 @@
             <!-- Header -->
             <header class="header">
                 <div class="search-bar">
-                    <input type="text" placeholder="Search...">
+                    <input type="text" id="global-search" placeholder="Search bookings, clients...">
                     <span>🔍</span>
                 </div>
                 <div class="user-info">
                     <div class="notifications">🔔</div>
-                    <div class="user-avatar">JD</div>
-                    <span>John Doe</span>
+                    <div class="user-avatar">AD</div>
+                    <span>Admin User</span>
                 </div>
             </header>
 
-            <!-- Stats Grid -->
-            <section class="stats-grid">
-                <div class="stat-card">
-                    <h3>Total Bookings</h3>
-                    <div class="value">0</div>
-                    <div class="trend">Loading...</div>
+            <!-- Dashboard Section -->
+            <section id="dashboard-section" class="dashboard-section">
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <button class="action-btn" onclick="createTestBooking()">
+                        ➕ Create Test Booking
+                    </button>
+                    <button class="action-btn" onclick="showSection('bookings')">
+                        📋 View All Bookings
+                    </button>
+                    <button class="action-btn success" onclick="generateSampleData()">
+                        🎯 Generate Sample Data
+                    </button>
+                    <button class="action-btn" onclick="refreshDashboard()">
+                        🔄 Refresh Data
+                    </button>
                 </div>
-                <div class="stat-card warning">
-                    <h3>Total Revenue</h3>
-                    <div class="value">$0.00</div>
-                    <div class="trend">Loading...</div>
-                </div>
-                <div class="stat-card success">
-                    <h3>Cancellation Rate</h3>
-                    <div class="value">0%</div>
-                    <div class="trend">Loading...</div>
-                </div>
-                <div class="stat-card">
-                    <h3>Unique Clients</h3>
-                    <div class="value">0</div>
-                    <div class="trend">Loading...</div>
+
+                <!-- Stats Grid -->
+                <section class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total Bookings</h3>
+                        <div class="value" id="total-bookings">0</div>
+                        <div class="trend">↑ 12% from last month</div>
+                    </div>
+                    <div class="stat-card warning">
+                        <h3>Total Revenue</h3>
+                        <div class="value" id="total-revenue">$0</div>
+                        <div class="trend">↑ 8% from last month</div>
+                    </div>
+                    <div class="stat-card success">
+                        <h3>Success Rate</h3>
+                        <div class="value" id="success-rate">0%</div>
+                        <div class="trend">↑ 5% from last month</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Active Clients</h3>
+                        <div class="value" id="active-clients">0</div>
+                        <div class="trend">↑ 15% from last month</div>
+                    </div>
+                </section>
+
+                <!-- Charts and Activity -->
+                <section class="content-grid">
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h2>Service Performance</h2>
+                            <select id="chart-period" onchange="updateCharts()">
+                                <option value="7">Last 7 days</option>
+                                <option value="30" selected>Last 30 days</option>
+                                <option value="90">Last 90 days</option>
+                            </select>
+                        </div>
+                        <canvas id="serviceChart" height="250"></canvas>
+                    </div>
+
+                    <div class="recent-activity">
+                        <div class="activity-header">
+                            <h2>Recent Activity</h2>
+                        </div>
+                        <ul class="activity-list" id="activity-list">
+                            <li class="activity-item">
+                                <div class="activity-icon">⏳</div>
+                                <div class="activity-content">
+                                    <h4>Loading activities...</h4>
+                                    <p>Please wait</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </section>
+
+                <!-- Revenue Chart -->
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h2>Revenue Trends</h2>
+                        <select id="revenue-period" onchange="updateRevenueChart()">
+                            <option value="7">Last 7 days</option>
+                            <option value="30" selected>Last 30 days</option>
+                            <option value="90">Last 90 days</option>
+                        </select>
+                    </div>
+                    <canvas id="revenueChart" height="200"></canvas>
                 </div>
             </section>
 
-            <!-- Charts and Activity -->
-            <section class="content-grid">
-                <div class="chart-container">
-                    <div class="chart-header">
-                        <h2>Performance Overview</h2>
-                        <select>
-                            <option>Last 7 days</option>
-                            <option>Last 30 days</option>
-                            <option>Last 90 days</option>
+            <!-- Bookings Section -->
+            <section id="bookings-section" class="dashboard-section" style="display: none;">
+                <div class="bookings-table-container">
+                    <div class="table-header">
+                        <h2>All Bookings</h2>
+                        <button class="action-btn" onclick="createTestBooking()">
+                            ➕ New Booking
+                        </button>
+                    </div>
+                    <div class="table-controls">
+                        <input type="text" id="search-bookings" placeholder="Search bookings..." onkeyup="filterBookings()">
+                        <select id="status-filter" onchange="filterBookings()">
+                            <option value="">All Status</option>
+                            <option value="confirmed">Confirmed</option>
+                            <option value="pending">Pending</option>
+                            <option value="cancelled">Cancelled</option>
                         </select>
                     </div>
-                    <div class="chart-placeholder">
-                        Chart Area - Integrate with Chart.js or similar
+                    <table class="bookings-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Client</th>
+                                <th>Service</th>
+                                <th>Date & Time</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bookings-table-body">
+                            <!-- Bookings will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Analytics Section -->
+            <section id="analytics-section" class="dashboard-section" style="display: none;">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Average Booking Value</h3>
+                        <div class="value" id="avg-booking-value">$0</div>
+                    </div>
+                    <div class="stat-card warning">
+                        <h3>Cancellation Rate</h3>
+                        <div class="value" id="cancellation-rate">0%</div>
+                    </div>
+                    <div class="stat-card success">
+                        <h3>Repeat Customer Rate</h3>
+                        <div class="value" id="repeat-rate">0%</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Monthly Growth</h3>
+                        <div class="value" id="monthly-growth">0%</div>
                     </div>
                 </div>
 
-                <div class="recent-activity">
-                    <div class="activity-header">
-                        <h2>Recent Activity</h2>
+                <div class="content-grid">
+                    <div class="chart-container">
+                        <h3>Booking Trends</h3>
+                        <canvas id="trendsChart" height="250"></canvas>
                     </div>
-                    <ul class="activity-list">
-                        <li class="activity-item">
-                            <div class="activity-icon">👤</div>
-                            <div class="activity-content">
-                                <h4>New user registered</h4>
-                                <p>2 minutes ago</p>
-                            </div>
-                        </li>
-                        <li class="activity-item">
-                            <div class="activity-icon">💰</div>
-                            <div class="activity-content">
-                                <h4>Payment received</h4>
-                                <p>1 hour ago</p>
-                            </div>
-                        </li>
-                        <li class="activity-item">
-                            <div class="activity-icon">📊</div>
-                            <div class="activity-content">
-                                <h4>Report generated</h4>
-                                <p>3 hours ago</p>
-                            </div>
-                        </li>
-                        <li class="activity-item">
-                            <div class="activity-icon">🛠️</div>
-                            <div class="activity-content">
-                                <h4>System updated</h4>
-                                <p>5 hours ago</p>
-                            </div>
-                        </li>
-                    </ul>
+                    <div class="chart-container">
+                        <h3>Service Distribution</h3>
+                        <canvas id="distributionChart" height="250"></canvas>
+                    </div>
                 </div>
+            </section>
+
+            <!-- Clients Section -->
+            <section id="clients-section" class="dashboard-section" style="display: none;">
+                <!-- Clients content will be loaded dynamically -->
+            </section>
+
+            <!-- Calendar Section -->
+            <section id="calendar-section" class="dashboard-section" style="display: none;">
+                <!-- Calendar content will be loaded dynamically -->
+            </section>
+
+            <!-- Reports Section -->
+            <section id="reports-section" class="dashboard-section" style="display: none;">
+                <!-- Reports content will be loaded dynamically -->
+            </section>
+
+            <!-- Settings Section -->
+            <section id="settings-section" class="dashboard-section" style="display: none;">
+                <!-- Settings content will be loaded dynamically -->
             </section>
         </main>
     </div>
+
+    <!-- Booking Details Modal -->
+    <div id="booking-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Booking Details</h3>
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="modal-content">
+                <!-- Modal content will be populated here -->
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Enhanced dashboard with FastAPI integration
-        document.addEventListener('DOMContentLoaded', function() {
-            // Update stats with real data from your API
-            async function updateDashboardStats() {
-                try {
-                    const response = await fetch('/business-dashboard');
-                    const data = await response.json();
+        // Global variables
+        let charts = {};
+        let allBookings = [];
 
-                    // Update stats cards
-                    const statCards = document.querySelectorAll('.stat-card');
-                    
-                    statCards[0].querySelector('.value').textContent = 
-                        data.business_overview.total_bookings.toLocaleString();
-                    
-                    statCards[1].querySelector('.value').textContent = 
-                        data.revenue_analytics.total_revenue;
-                    
-                    statCards[2].querySelector('.value').textContent = 
-                        data.business_overview.cancellation_rate;
-                    
-                    statCards[3].querySelector('.value').textContent = 
-                        data.business_overview.unique_clients.toLocaleString();
+        // Show toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
 
-                    // Update recent activity with real bookings
-                    const bookingsResponse = await fetch('/view-bookings');
-                    const bookingsData = await bookingsResponse.json();
+            setTimeout(() => toast.classList.add('show'), 100);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
 
-                    updateRecentActivity(bookingsData.bookings);
+        // Section navigation
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.dashboard-section').forEach(section => {
+                section.style.display = 'none';
+            });
 
-                } catch (error) {
-                    console.error('Error fetching dashboard data:', error);
-                }
-            }
+            // Show selected section
+            document.getElementById(sectionName + '-section').style.display = 'block';
 
-            function updateRecentActivity(bookings) {
-                const activityList = document.querySelector('.activity-list');
-                activityList.innerHTML = '';
-
-                // Show latest 4 bookings
-                const recentBookings = bookings.slice(0, 4);
-
-                recentBookings.forEach(booking => {
-                    const activityItem = document.createElement('li');
-                    activityItem.className = 'activity-item';
-                    activityItem.innerHTML = `
-                        <div class="activity-icon">📅</div>
-                        <div class="activity-content">
-                            <h4>New booking: ${booking.service_type}</h4>
-                            <p>${booking.client_name} - ${booking.booking_date}</p>
-                        </div>
-                    `;
-                    activityList.appendChild(activityItem);
-                });
-            }
-
-            // Navigation handlers
+            // Update navigation
             document.querySelectorAll('.nav-links a').forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    document.querySelectorAll('.nav-links a').forEach(l => l.classList.remove('active'));
-                    this.classList.add('active');
-
-                    // Handle different dashboard sections
-                    const section = this.textContent.trim();
-                    handleNavigation(section);
-                });
+                link.classList.remove('active');
             });
+            event.target.classList.add('active');
 
-            function handleNavigation(section) {
-                // You can expand this to load different dashboard views
-                console.log('Navigating to:', section);
+            // Load section-specific data
+            switch(sectionName) {
+                case 'dashboard':
+                    loadDashboardData();
+                    break;
+                case 'bookings':
+                    loadBookingsTable();
+                    break;
+                case 'analytics':
+                    loadAnalytics();
+                    break;
+                case 'clients':
+                    loadClientsSection();
+                    break;
+                case 'calendar':
+                    loadCalendarSection();
+                    break;
+                case 'reports':
+                    loadReportsSection();
+                    break;
+                case 'settings':
+                    loadSettingsSection();
+                    break;
+            }
+        }
 
-                if (section === '📊 Dashboard') {
-                    updateDashboardStats();
-                } else if (section === '📈 Analytics') {
-                    // Load analytics view
-                    window.location.href = '/business-dashboard';
-                }
+        // Load all dashboard data
+        async function loadDashboardData() {
+            try {
+                showToast('Loading dashboard data...', 'info');
+                const [dashboardData, bookingsData] = await Promise.all([
+                    fetch('/business-dashboard').then(r => r.json()),
+                    fetch('/view-bookings').then(r => r.json())
+                ]);
+
+                updateStats(dashboardData);
+                updateActivity(bookingsData.bookings);
+                updateCharts(dashboardData);
+                allBookings = bookingsData.bookings;
+
+                showToast('Dashboard updated successfully!', 'success');
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+                showToast('Failed to load dashboard data', 'error');
+            }
+        }
+
+        // Update statistics
+        function updateStats(data) {
+            document.getElementById('total-bookings').textContent = 
+                data.business_overview.total_bookings.toLocaleString();
+            document.getElementById('total-revenue').textContent = 
+                data.revenue_analytics.total_revenue;
+            document.getElementById('success-rate').textContent = 
+                data.performance_metrics.booking_conversion_rate;
+            document.getElementById('active-clients').textContent = 
+                data.business_overview.unique_clients;
+        }
+
+        // Update recent activity
+        function updateActivity(bookings) {
+            const activityList = document.getElementById('activity-list');
+            activityList.innerHTML = '';
+
+            const recentBookings = bookings.slice(0, 5);
+
+            recentBookings.forEach(booking => {
+                const activityItem = document.createElement('li');
+                activityItem.className = 'activity-item';
+                activityItem.innerHTML = `
+                    <div class="activity-icon">📅</div>
+                    <div class="activity-content">
+                        <h4>${booking.service_type} - ${booking.client_name}</h4>
+                        <p>${booking.booking_date} at ${booking.booking_time}</p>
+                    </div>
+                `;
+                activityList.appendChild(activityItem);
+            });
+        }
+
+        // Initialize and update charts
+        function updateCharts(data) {
+            const serviceCtx = document.getElementById('serviceChart').getContext('2d');
+
+            if (charts.serviceChart) {
+                charts.serviceChart.destroy();
             }
 
-            // Test booking functionality
-            document.querySelector('.test-booking-btn')?.addEventListener('click', async function() {
-                try {
-                    const response = await fetch('/simulate-booking', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            client_name: 'Dashboard Test User',
-                            service_type: 'Goddess Braids',
-                            service_price: 120
-                        })
-                    });
-
-                    const result = await response.json();
-                    alert('Test booking created! ID: ' + result.booking_id);
-                    updateDashboardStats(); // Refresh stats
-
-                } catch (error) {
-                    console.error('Error creating test booking:', error);
+            charts.serviceChart = new Chart(serviceCtx, {
+                type: 'bar',
+                data: {
+                    labels: data.service_analytics.map(s => s.service),
+                    datasets: [{
+                        label: 'Number of Bookings',
+                        data: data.service_analytics.map(s => s.bookings),
+                        backgroundColor: ['#4361ee', '#3a0ca3', '#4cc9f0', '#f72585'],
+                        borderColor: ['#4361ee', '#3a0ca3', '#4cc9f0', '#f72585'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
                 }
             });
 
-            // Initialize dashboard
-            updateDashboardStats();
+            updateRevenueChart();
+        }
 
+        function updateRevenueChart() {
+            const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+
+            if (charts.revenueChart) {
+                charts.revenueChart.destroy();
+            }
+
+            // Sample revenue data
+            const revenueData = {
+                labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                datasets: [{
+                    label: 'Weekly Revenue',
+                    data: [1200, 1900, 1500, 2100],
+                    borderColor: '#4361ee',
+                    backgroundColor: 'rgba(67, 97, 238, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            };
+
+            charts.revenueChart = new Chart(revenueCtx, {
+                type: 'line',
+                data: revenueData,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        // Bookings table management
+        async function loadBookingsTable() {
+            try {
+                const response = await fetch('/view-bookings');
+                const data = await response.json();
+                allBookings = data.bookings;
+                renderBookingsTable(allBookings);
+                showToast('Bookings loaded successfully!', 'success');
+            } catch (error) {
+                console.error('Error loading bookings:', error);
+                showToast('Failed to load bookings', 'error');
+            }
+        }
+
+        function renderBookingsTable(bookings) {
+            const tbody = document.getElementById('bookings-table-body');
+            tbody.innerHTML = '';
+
+            if (bookings.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem;">No bookings found</td></tr>';
+                return;
+            }
+
+            bookings.forEach(booking => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>#${booking.booking_id}</td>
+                    <td>${booking.client_name}</td>
+                    <td>${booking.service_type}</td>
+                    <td>${booking.booking_date} ${booking.booking_time}</td>
+                    <td>$${booking.service_price}</td>
+                    <td><span class="status-badge status-${booking.status || 'confirmed'}">${booking.status || 'confirmed'}</span></td>
+                    <td>
+                        <button onclick="viewBookingDetails(${booking.booking_id})" class="btn-small">View</button>
+                        <button onclick="editBooking(${booking.booking_id})" class="btn-small btn-success">Edit</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function filterBookings() {
+            const searchTerm = document.getElementById('search-bookings').value.toLowerCase();
+            const statusFilter = document.getElementById('status-filter').value;
+
+            const filtered = allBookings.filter(booking => {
+                const matchesSearch = booking.client_name.toLowerCase().includes(searchTerm) ||
+                           booking.service_type.toLowerCase().includes(searchTerm);
+                const matchesStatus = !statusFilter || booking.status === statusFilter;
+                return matchesSearch && matchesStatus;
+            });
+
+            renderBookingsTable(filtered);
+        }
+
+        // Modal functions
+        function viewBookingDetails(bookingId) {
+            const booking = allBookings.find(b => b.booking_id === bookingId);
+            if (booking) {
+                document.getElementById('modal-content').innerHTML = `
+                    <h4>Booking #${booking.booking_id}</h4>
+                    <div class="form-group">
+                        <label>Client:</label>
+                        <p>${booking.client_name}</p>
+                    </div>
+                    <div class="form-group">
+                        <label>Service:</label>
+                        <p>${booking.service_type}</p>
+                    </div>
+                    <div class="form-group">
+                        <label>Date & Time:</label>
+                        <p>${booking.booking_date} at ${booking.booking_time}</p>
+                    </div>
+                    <div class="form-group">
+                        <label>Amount:</label>
+                        <p>$${booking.service_price}</p>
+                    </div>
+                    <div class="form-group">
+                        <label>Status:</label>
+                        <p><span class="status-badge status-${booking.status || 'confirmed'}">${booking.status || 'confirmed'}</span></p>
+                    </div>
+                    <div class="form-group">
+                        <label>Created:</label>
+                        <p>${booking.created_at}</p>
+                    </div>
+                `;
+                document.getElementById('booking-modal').style.display = 'flex';
+            }
+        }
+
+        function editBooking(bookingId) {
+            showToast(`Edit booking #${bookingId} - Feature coming soon!`, 'info');
+        }
+
+        function closeModal() {
+            document.getElementById('booking-modal').style.display = 'none';
+        }
+
+        // API interactions
+        async function createTestBooking() {
+            try {
+                const response = await fetch('/simulate-booking', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        client_name: 'Test Client ' + new Date().toLocaleTimeString(),
+                        service_type: 'Goddess Braids',
+                        service_price: 120
+                    })
+                });
+
+                const result = await response.json();
+                showToast('Test booking created! ID: ' + result.booking_id, 'success');
+                loadDashboardData();
+
+            } catch (error) {
+                console.error('Error creating test booking:', error);
+                showToast('Failed to create test booking', 'error');
+            }
+        }
+
+        async function generateSampleData() {
+            try {
+                await fetch('/generate-sample-data');
+                showToast('Sample data generated successfully!', 'success');
+                loadDashboardData();
+            } catch (error) {
+                console.error('Error generating sample data:', error);
+                showToast('Failed to generate sample data', 'error');
+            }
+        }
+
+        function refreshDashboard() {
+            loadDashboardData();
+            showToast('Dashboard data refreshed!', 'success');
+        }
+
+        // Analytics functions
+        async function loadAnalytics() {
+            try {
+                const response = await fetch('/business-dashboard');
+                const data = await response.json();
+
+                document.getElementById('avg-booking-value').textContent = 
+                    data.revenue_analytics.average_booking_value;
+                document.getElementById('cancellation-rate').textContent = 
+                    data.business_overview.cancellation_rate;
+                document.getElementById('repeat-rate').textContent = 
+                    data.performance_metrics.repeat_customer_rate;
+                document.getElementById('monthly-growth').textContent = '12%';
+
+                initAnalyticsCharts(data);
+                showToast('Analytics loaded successfully!', 'success');
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+                showToast('Failed to load analytics', 'error');
+            }
+        }
+
+        function initAnalyticsCharts(data) {
+            const trendsCtx = document.getElementById('trendsChart').getContext('2d');
+            if (charts.trendsChart) charts.trendsChart.destroy();
+
+            charts.trendsChart = new Chart(trendsCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Monthly Bookings',
+                        data: [45, 52, 48, 61, 55, 68],
+                        borderColor: '#4361ee',
+                        backgroundColor: 'rgba(67, 97, 238, 0.1)',
+                        fill: true
+                    }]
+                }
+            });
+
+            const distCtx = document.getElementById('distributionChart').getContext('2d');
+            if (charts.distributionChart) charts.distributionChart.destroy();
+
+            charts.distributionChart = new Chart(distCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.service_analytics.map(s => s.service),
+                    datasets: [{
+                        data: data.service_analytics.map(s => s.bookings),
+                        backgroundColor: ['#4361ee', '#3a0ca3', '#4cc9f0', '#f72585']
+                    }]
+                }
+            });
+        }
+
+        // Clients Section
+        async function loadClientsSection() {
+            try {
+                const response = await fetch('/view-bookings');
+                const data = await response.json();
+
+                const clients = {};
+                data.bookings.forEach(booking => {
+                    if (!clients[booking.client_phone]) {
+                        clients[booking.client_phone] = {
+                            phone: booking.client_phone,
+                            name: booking.client_name,
+                            bookings: [],
+                            total_spent: 0,
+                            first_booking: booking.created_at
+                        };
+                    }
+                    clients[booking.client_phone].bookings.push(booking);
+                    clients[booking.client_phone].total_spent += booking.service_price;
+                });
+
+                displayClientsTable(Object.values(clients));
+                showToast('Clients loaded successfully!', 'success');
+            } catch (error) {
+                console.error('Error loading clients:', error);
+                showToast('Failed to load clients', 'error');
+            }
+        }
+
+        function displayClientsTable(clients) {
+            const clientsSection = document.getElementById('clients-section');
+            // Simple placeholder for clients table - can be expanded
+            showToast('Clients section loaded!', 'info');
+        }
+
+        // Calendar Section
+        function loadCalendarSection() {
+            showToast('Calendar feature coming soon!', 'info');
+        }
+
+        // Reports Section
+        function loadReportsSection() {
+            showToast('Reports feature coming soon!', 'info');
+        }
+
+        // Settings Section
+        function loadSettingsSection() {
+            showToast('Settings feature coming soon!', 'info');
+        }
+
+        // Initialize dashboard on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboardData();
+            
             // Auto-refresh every 30 seconds
-            setInterval(updateDashboardStats, 30000);
+            setInterval(() => {
+                if (document.getElementById('dashboard-section').style.display !== 'none') {
+                    loadDashboardData();
+                }
+            }, 30000);
         });
     </script>
 </body>
