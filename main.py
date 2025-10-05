@@ -100,7 +100,7 @@ init_db()
 
 @app.get("/", response_class=HTMLResponse)
 async def root():
-    return """
+    html_content = """
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -336,6 +336,15 @@ async def root():
     </body>
     </html>
     """
+    
+    return HTMLResponse(
+        content=html_content,
+        headers={
+            'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+        }
+    )
 
 def calculate_booking_fee(service_price: float) -> dict:
     """Calculate 10% booking fee + tax"""
